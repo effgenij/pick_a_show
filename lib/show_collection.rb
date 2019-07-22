@@ -1,30 +1,11 @@
 require 'nokogiri'
-require 'open-uri'
 
 class ShowCollection
-  #attr_reader :shows
-
-  def self.from_url(url)
+  def self.from_html(html)
     shows = []
-    doc = Nokogiri::HTML(open(url))
+    doc = Nokogiri::HTML(html)
     doc.css('.js-film-list-item').each do |show|
-      id = show['id'].split('_').last
-      title = show.css('td.news div a.all').text.split('  ').first
-      year_string = show.css('td.news div span').text
-      year = year_string[/\((.*?)\)/].gsub('(', '').gsub(')', '')
-      country_and_genre = show.css('td.news span.gray_text').text
-      country = country_and_genre.split(/[,|.]/).first.strip
-      genres = country_and_genre[/\((.*?)\)/].gsub('(', '').gsub(')', '').gsub(' ', '').split(/[,|.]/)
-      rate = show.css('td div.ratingBlock span.all').text.split(' ').first
-
-      shows << Show.new(
-        id: id,
-        title: title,
-        year: year,
-        country: country,
-        genres: genres,
-        rate: rate
-      )
+      shows << Show.new(get_show_params(show))
     end
 
     new(shows)
@@ -32,6 +13,26 @@ class ShowCollection
 
   def initialize(shows)
     @shows = shows
+  end
+
+  def self.get_show_params(show)
+    id = show['id'].split('_').last
+    title = show.css('td.news div a.all').text.split('  ').first
+    year_string = show.css('td.news div span').text
+    year = year_string[/\((.*?)\)/].gsub('(', '').gsub(')', '')
+    country_and_genre = show.css('td.news span.gray_text').text
+    country = country_and_genre.split(/[,|.]/).first.strip
+    genres = country_and_genre[/\((.*?)\)/].gsub('(', '').gsub(')', '').gsub(' ', '').split(/[,|.]/)
+    rate = show.css('td div.ratingBlock span.all').text.split(' ').first
+
+    {
+      id: id,
+      title: title,
+      year: year,
+      country: country,
+      genres: genres,
+      rate: rate
+    }
   end
 
   def uniq_genres

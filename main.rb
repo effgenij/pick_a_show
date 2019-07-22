@@ -1,9 +1,10 @@
 require_relative 'lib/show'
 require_relative 'lib/show_collection'
+require 'open-uri'
 
-path = 'https://www.kinopoisk.ru/top/lists/257/filtr/all/sort/order/perpage/100/'
+html = open('https://www.kinopoisk.ru/top/lists/257/filtr/all/sort/order/perpage/100/')
 
-shows = ShowCollection.from_url(path)
+shows = ShowCollection.from_html(html)
 genres = shows.uniq_genres
 
 puts 'У нас есть такие жанры:'
